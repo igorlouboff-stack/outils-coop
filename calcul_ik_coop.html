@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcul IK — La Coop des Territoires</title>
+<style>
+  :root {
+    --vert: #2D5A3D;
+    --vert-clair: #4A8C5C;
+    --vert-pale: #EAF2EC;
+    --ecru: #F8F5EE;
+    --gris: #6B7280;
+    --gris-clair: #E5E7EB;
+    --texte: #1A2E1F;
+    --orange-alerte: #D97706;
+    --orange-pale: #FEF3C7;
+    --rouge: #B91C1C;
+    --rouge-pale: #FEE2E2;
+    --blanc: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--ecru);
+    color: var(--texte);
+    min-height: 100vh;
+    padding: 32px 16px;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-left: 4px solid var(--vert);
+    padding-left: 16px;
+    margin-bottom: 32px;
+  }
+
+  header .label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--vert-clair);
+    margin-bottom: 6px;
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: normal;
+    line-height: 1.3;
+    color: var(--vert);
+  }
+
+  header p {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    color: var(--gris);
+    margin-top: 6px;
+  }
+
+  .card {
+    background: var(--blanc);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid var(--gris-clair);
+  }
+
+  .card h2 {
+    font-size: 14px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--vert);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--vert-pale);
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 520px) {
+    .input-grid { grid-template-columns: 1fr; }
+  }
+
+  .field label {
+    display: block;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 12px;
+    color: var(--gris);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .field .hint {
+    font-size: 11px;
+    color: var(--gris);
+    margin-top: 4px;
+    font-style: italic;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+
+  .field input[type="number"],
+  .field input[type="range"] {
+    width: 100%;
+  }
+
+  .field input[type="number"] {
+    padding: 9px 12px;
+    border: 1px solid var(--gris-clair);
+    border-radius: 5px;
+    font-size: 15px;
+    font-family: 'Helvetica Neue', sans-serif;
+    background: var(--ecru);
+    color: var(--texte);
+    transition: border-color 0.2s;
+  }
+
+  .field input[type="number"]:focus {
+    outline: none;
+    border-color: var(--vert-clair);
+    background: var(--blanc);
+  }
+
+  .field input[type="range"] {
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--gris-clair);
+    border-radius: 2px;
+    margin-top: 8px;
+  }
+
+  .field input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--vert);
+    cursor: pointer;
+  }
+
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--gris);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-top: 4px;
+  }
+
+  .range-value {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--vert);
+    margin-top: 6px;
+  }
+
+  /* Résultat principal */
+  .result-main {
+    background: var(--vert);
+    color: var(--blanc);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .result-main .big-number {
+    font-size: 42px;
+    font-weight: 700;
+    font-family: 'Helvetica Neue', sans-serif;
+    line-height: 1;
+  }
+
+  .result-main .big-label {
+    font-size: 12px;
+    opacity: 0.75;
+    font-family: 'Helvetica Neue', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+  }
+
+  .result-main .pennylane-block {
+    border-left: 1px solid rgba(255,255,255,0.25);
+    padding-left: 20px;
+  }
+
+  .result-main .pennylane-number {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: 'Helvetica Neue', sans-serif;
+    line-height: 1;
+  }
+
+  .result-main .pennylane-label {
+    font-size: 11px;
+    opacity: 0.75;
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 520px) {
+    .result-main { grid-template-columns: 1fr; }
+    .result-main .pennylane-block { border-left: none; border-top: 1px solid rgba(255,255,255,0.25); padding-left: 0; padding-top: 16px; }
+  }
+
+  /* Alerte */
+  .alert {
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .alert.warning {
+    background: var(--orange-pale);
+    border: 1px solid #FDE68A;
+    color: #92400E;
+  }
+
+  .alert.ok {
+    background: var(--vert-pale);
+    border: 1px solid #A7F3D0;
+    color: var(--vert);
+  }
+
+  .alert strong { font-weight: 600; }
+
+  /* Table de décomposition */
+  .decomp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+  }
+
+  .decomp-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gris);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gris-clair);
+    font-weight: 500;
+  }
+
+  .decomp-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--vert-pale);
+    color: var(--texte);
+  }
+
+  .decomp-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: var(--vert);
+  }
+
+  .decomp-table .total-row td {
+    border-bottom: none;
+    padding-top: 14px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  /* Proposition de taux */
+  .taux-bloc {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 520px) {
+    .taux-bloc { grid-template-columns: 1fr; }
+  }
+
+  .taux-option {
+    border: 1px solid var(--gris-clair);
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .taux-option:hover {
+    border-color: var(--vert-clair);
+    background: var(--vert-pale);
+  }
+
+  .taux-option.selected {
+    border-color: var(--vert);
+    background: var(--vert-pale);
+  }
+
+  .taux-option .t-val {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Helvetica Neue', sans-serif;
+    color: var(--vert);
+  }
+
+  .taux-option .t-label {
+    font-size: 11px;
+    color: var(--gris);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-top: 3px;
+  }
+
+  .taux-option .t-desc {
+    font-size: 10px;
+    color: var(--gris);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* Note de bas */
+  .footnote {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 12px;
+    color: var(--gris);
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gris-clair);
+    line-height: 1.6;
+  }
+
+  .footnote strong { color: var(--texte); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="label">La Coop des Territoires · RH & Vie coopérative</div>
+    <h1>Révision du barème kilométrique</h1>
+    <p>Proposition de calcul dynamique — juin 2026 · Deadline actée en Point Coop</p>
+  </header>
+
+  <!-- INPUTS -->
+  <div class="card">
+    <h2>Paramètres du trimestre</h2>
+    <div class="input-grid">
+      <div class="field">
+        <label>Prix du carburant (€/L)</label>
+        <input type="number" id="prixEssence" value="2.10" step="0.05" min="1" max="5">
+        <div class="hint">Prix moyen constaté ce trimestre (sans plomb 95)</div>
+      </div>
+      <div class="field">
+        <label>Consommation du véhicule (L/100 km)</label>
+        <input type="number" id="conso" value="7.5" step="0.5" min="3" max="15">
+        <div class="hint">Valeur de référence collective : 7,5 L/100 km</div>
+      </div>
+      <div class="field">
+        <label>Frais d'usage annuel (€)</label>
+        <input type="number" id="fraisUsage" value="1200" step="50" min="0" max="5000">
+        <div class="hint">Assurance + entretien + pneumatiques ÷ km annuels</div>
+      </div>
+      <div class="field">
+        <label>Kilométrage professionnel annuel estimé (km)</label>
+        <input type="number" id="kmAnnuel" value="8000" step="500" min="1000" max="50000">
+        <div class="hint">Estimation collective pour lisser les frais fixes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTE -->
+  <div class="alert" id="alerteEcart"></div>
+
+  <!-- RÉSULTAT PRINCIPAL -->
+  <div class="result-main" id="resultMain">
+    <div>
+      <div class="big-number" id="tauxCalcule">—</div>
+      <div class="big-label">Taux réel calculé (€/km)</div>
+    </div>
+    <div class="pennylane-block">
+      <div class="pennylane-number" id="kmPennylane">—</div>
+      <div class="pennylane-label">km à déclarer dans Pennylane<br>pour un trajet réel de <span id="kmRefLabel">100</span> km</div>
+    </div>
+  </div>
+
+  <!-- DÉCOMPOSITION -->
+  <div class="card">
+    <h2>Décomposition du coût au km</h2>
+    <table class="decomp-table">
+      <thead>
+        <tr>
+          <th>Poste</th>
+          <th>Calcul</th>
+          <th>€/km</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Carburant</td>
+          <td id="calcCarbu">— L × —€ ÷ 100</td>
+          <td id="valCarbu">—</td>
+        </tr>
+        <tr>
+          <td>Frais d'usage (assurance, entretien…)</td>
+          <td id="calcUsage">—€ ÷ — km/an</td>
+          <td id="valUsage">—</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2"><strong>Coût réel total</strong></td>
+          <td id="valTotal">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAUX PROPOSÉS -->
+  <div class="card">
+    <h2>Options de taux à soumettre au collectif</h2>
+    <div class="taux-bloc">
+      <div class="taux-option selected" id="opt1" onclick="selectOption(1)">
+        <div class="t-val" id="opt1Val">—</div>
+        <div class="t-label">€/km · Coût réel calculé</div>
+        <div class="t-desc">Carburant + frais d'usage. <strong>Recommandation.</strong></div>
+      </div>
+      <div class="taux-option" id="opt2" onclick="selectOption(2)">
+        <div class="t-val" id="opt2Val">0,529 €</div>
+        <div class="t-label">€/km · Barème URSSAF</div>
+        <div class="t-desc">Barème fiscal standard voiture &lt; 3cv. Plafond exonération sociale.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÉCANISME DE RÉVISION -->
+  <div class="card">
+    <h2>Mécanisme de révision trimestrielle</h2>
+    <table class="decomp-table">
+      <tbody>
+        <tr>
+          <td>Fréquence de révision</td>
+          <td>Tous les 3 mois (janvier, avril, juillet, octobre)</td>
+        </tr>
+        <tr>
+          <td>Déclencheur de révision</td>
+          <td>Écart &gt; 10 % entre le taux actuel et le taux recalculé</td>
+        </tr>
+        <tr>
+          <td>Qui met à jour</td>
+          <td>Albane (pilote pôle Support) · délai : premier Point Coop du trimestre</td>
+        </tr>
+        <tr>
+          <td>Où est publié le taux en vigueur</td>
+          <td>Page Notion 💲 Notes de frais · section "Taux en vigueur"</td>
+        </tr>
+        <tr>
+          <td>Rétroactivité</td>
+          <td>Déplacements du mois en cours rattrapés si écart &gt; 10 % (ex. Élise : mars + avril)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footnote">
+    <strong>Sources :</strong> Barème URSSAF 2025 (0,529 €/km pour véhicule thermique &lt; 3 cv, &lt; 5 000 km/an). Taux interne décidé collectivement en Point Coop. Le calcul ci-dessus est une aide à la décision — le taux final est validé par le collectif.
+  </div>
+
+</div>
+
+<script>
+  const TAUX_PENNYLANE = 0.529;
+  let selectedOption = 1;
+  let tauxOptions = [0, 0];
+
+  function round2(n) { return Math.round(n * 100) / 100; }
+  function fmt(n) { return n.toFixed(3).replace('.', ','); }
+
+  function calcul() {
+    const prix = parseFloat(document.getElementById('prixEssence').value) || 2.10;
+    const conso = parseFloat(document.getElementById('conso').value) || 7.5;
+    const frais = parseFloat(document.getElementById('fraisUsage').value) || 1200;
+    const kmAn = parseFloat(document.getElementById('kmAnnuel').value) || 8000;
+
+    const coutCarbu = (conso * prix) / 100;
+    const coutUsage = frais / kmAn;
+    const coutTotal = coutCarbu + coutUsage;
+
+    // Afficher décomposition
+    document.getElementById('calcCarbu').textContent = `${conso} L × ${prix.toFixed(2).replace('.',',')}€ ÷ 100`;
+    document.getElementById('valCarbu').textContent = fmt(coutCarbu) + ' €';
+    document.getElementById('calcUsage').textContent = `${frais}€ ÷ ${kmAn.toLocaleString('fr-FR')} km/an`;
+    document.getElementById('valUsage').textContent = fmt(coutUsage) + ' €';
+    document.getElementById('valTotal').textContent = fmt(coutTotal) + ' €';
+
+    // Options : coût réel et barème URSSAF
+    tauxOptions = [coutTotal, 0.529];
+
+    document.getElementById('opt1Val').textContent = fmt(coutTotal) + ' €';
+    document.getElementById('opt2Val').textContent = '0,529 €';
+
+    // Taux principal affiché
+    document.getElementById('tauxCalcule').textContent = fmt(coutTotal) + ' €';
+
+    // Alerte écart avec taux actuel (0,25)
+    const TAUX_ACTUEL = 0.25;
+    const ecart = ((coutTotal - TAUX_ACTUEL) / TAUX_ACTUEL) * 100;
+    const alertEl = document.getElementById('alerteEcart');
+    if (ecart > 10) {
+      alertEl.style.display = 'block';
+      alertEl.className = 'alert warning';
+      alertEl.innerHTML = `<strong>⚠ Taux actuel (0,25 €/km) sous-évalué de ${ecart.toFixed(0)} %</strong> par rapport au coût réel calculé (${fmt(coutTotal)} €/km). Révision déclenchée selon le mécanisme trimestriel.`;
+    } else if (ecart < -5) {
+      alertEl.style.display = 'block';
+      alertEl.className = 'alert ok';
+      alertEl.innerHTML = `<strong>✓ Taux actuel (0,25 €/km) légèrement au-dessus</strong> du coût réel calculé. Aucune révision nécessaire ce trimestre.`;
+    } else {
+      alertEl.style.display = 'block';
+      alertEl.className = 'alert ok';
+      alertEl.innerHTML = `<strong>✓ Taux actuel (0,25 €/km) dans la norme</strong> — écart de ${Math.abs(ecart).toFixed(0)} % avec le coût réel. Pas de révision urgente.`;
+    }
+
+    updatePennylane();
+  }
+
+  function updatePennylane() {
+    const taux = tauxOptions[selectedOption - 1] || 0;
+    const ratio = taux / TAUX_PENNYLANE;
+    const kmDeclarer = Math.round(ratio * 100);
+
+    document.getElementById('kmPennylane').textContent = kmDeclarer + ' km';
+    document.getElementById('kmRefLabel').textContent = '100';
+  }
+
+  function selectOption(n) {
+    selectedOption = n;
+    document.getElementById('opt1').classList.toggle('selected', n === 1);
+    document.getElementById('opt2').classList.toggle('selected', n === 2);
+    updatePennylane();
+  }
+
+  // Recalcul automatique à chaque changement
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    el.addEventListener('input', calcul);
+  });
+
+  // Calcul initial
+  calcul();
+</script>
+</body>
+</html>
