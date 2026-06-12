@@ -382,6 +382,11 @@
         <input type="number" id="kmAnnuel" value="8000" step="500" min="1000" max="50000">
         <div class="hint">Estimation collective pour lisser les frais fixes</div>
       </div>
+      <div class="field">
+        <label>Prorata d'utilisation professionnelle (%)</label>
+        <input type="number" id="prorata" value="50" step="5" min="10" max="100">
+        <div class="hint">Part des frais d'usage (assurance, entretien) imputable au pro. Le carburant est compté à 100%.</div>
+      </div>
     </div>
   </div>
 
@@ -495,15 +500,16 @@
     const conso = parseFloat(document.getElementById('conso').value) || 7.5;
     const frais = parseFloat(document.getElementById('fraisUsage').value) || 1200;
     const kmAn = parseFloat(document.getElementById('kmAnnuel').value) || 8000;
+    const prorata = (parseFloat(document.getElementById('prorata').value) || 50) / 100;
 
     const coutCarbu = (conso * prix) / 100;
-    const coutUsage = frais / kmAn;
+    const coutUsage = (frais * prorata) / kmAn;
     const coutTotal = coutCarbu + coutUsage;
 
     // Afficher décomposition
     document.getElementById('calcCarbu').textContent = `${conso} L × ${prix.toFixed(2).replace('.',',')}€ ÷ 100`;
     document.getElementById('valCarbu').textContent = fmt(coutCarbu) + ' €';
-    document.getElementById('calcUsage').textContent = `${frais}€ ÷ ${kmAn.toLocaleString('fr-FR')} km/an`;
+    document.getElementById('calcUsage').textContent = `${frais}€ × ${Math.round(prorata*100)}% ÷ ${kmAn.toLocaleString('fr-FR')} km/an`;
     document.getElementById('valUsage').textContent = fmt(coutUsage) + ' €';
     document.getElementById('valTotal').textContent = fmt(coutTotal) + ' €';
 
