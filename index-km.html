@@ -378,14 +378,14 @@
         <div class="hint">Assurance + entretien + pneumatiques ÷ km annuels</div>
       </div>
       <div class="field">
-        <label>Kilométrage professionnel annuel estimé (km)</label>
-        <input type="number" id="kmAnnuel" value="8000" step="500" min="1000" max="50000">
-        <div class="hint">Estimation collective pour lisser les frais fixes</div>
+        <label>Kilométrage total annuel du véhicule (km)</label>
+        <input type="number" id="kmAnnuel" value="16000" step="500" min="1000" max="50000">
+        <div class="hint">Pro + perso. Sert à étaler les frais fixes (assurance, entretien) sur l'usage réel du véhicule</div>
       </div>
       <div class="field">
-        <label>Prorata d'utilisation professionnelle (%)</label>
+        <label>Part de l'usage professionnel (%)</label>
         <input type="number" id="prorata" value="50" step="5" min="10" max="100">
-        <div class="hint">Part des frais d'usage (assurance, entretien) imputable au pro. Le carburant est compté à 100%.</div>
+        <div class="hint">Sert à estimer le km pro annuel à partir du km total. Le coût au km lui-même ne dépend pas de ce ratio.</div>
       </div>
     </div>
   </div>
@@ -426,6 +426,11 @@
           <td>Frais d'usage (assurance, entretien…)</td>
           <td id="calcUsage">—€ ÷ — km/an</td>
           <td id="valUsage">—</td>
+        </tr>
+        <tr>
+          <td>Kilométrage pro estimé</td>
+          <td id="calcKmPro">— km total × — %</td>
+          <td id="valKmPro" style="color: var(--gris);">—</td>
         </tr>
         <tr class="total-row">
           <td colspan="2"><strong>Coût réel total</strong></td>
@@ -503,14 +508,17 @@
     const prorata = (parseFloat(document.getElementById('prorata').value) || 50) / 100;
 
     const coutCarbu = (conso * prix) / 100;
-    const coutUsage = (frais * prorata) / kmAn;
+    const coutUsage = frais / kmAn;
     const coutTotal = coutCarbu + coutUsage;
+    const kmPro = Math.round(kmAn * prorata);
 
     // Afficher décomposition
     document.getElementById('calcCarbu').textContent = `${conso} L × ${prix.toFixed(2).replace('.',',')}€ ÷ 100`;
     document.getElementById('valCarbu').textContent = fmt(coutCarbu) + ' €';
-    document.getElementById('calcUsage').textContent = `${frais}€ × ${Math.round(prorata*100)}% ÷ ${kmAn.toLocaleString('fr-FR')} km/an`;
+    document.getElementById('calcUsage').textContent = `${frais}€ ÷ ${kmAn.toLocaleString('fr-FR')} km total/an`;
     document.getElementById('valUsage').textContent = fmt(coutUsage) + ' €';
+    document.getElementById('calcKmPro').textContent = `${kmAn.toLocaleString('fr-FR')} km × ${Math.round(prorata*100)}%`;
+    document.getElementById('valKmPro').textContent = kmPro.toLocaleString('fr-FR') + ' km/an';
     document.getElementById('valTotal').textContent = fmt(coutTotal) + ' €';
 
     // Options : coût réel et barème URSSAF
